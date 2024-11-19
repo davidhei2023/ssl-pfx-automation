@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zap - SSL Tools</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input, textarea, button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Zap - SSL Tools</h1>
+
+    <form id="script1">
+        <h2>Zap - GeoTrust RapidSSL - 2025 v2.0.0</h2>
+        <label for="fqdn1">FQDN:</label>
+        <input type="text" id="fqdn1" name="fqdn">
+        <button type="submit">Run Script 1</button>
+    </form>
+
+    <form id="script2">
+        <h2>Zap - GeoTrust RapidSSL Wildcard - 2025 v2.0.0</h2>
+        <label for="fqdn2">FQDN:</label>
+        <input type="text" id="fqdn2" name="fqdn">
+        <button type="submit">Run Script 2</button>
+    </form>
+
+    <form id="script3">
+        <h2>Convert Certificate to PFX</h2>
+        <label>Certificate:</label>
+        <textarea name="certificate" rows="5"></textarea>
+        <label>Private Key:</label>
+        <textarea name="privateKey" rows="5"></textarea>
+        <label>PFX Name:</label>
+        <input type="text" name="pfxName">
+        <button type="submit">Run Script 3</button>
+    </form>
+</body>
+</html>
