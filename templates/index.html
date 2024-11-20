@@ -7,51 +7,142 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+            line-height: 1.6;
+        }
+        h1, h2 {
+            text-align: center;
+            color: #555;
         }
         h1 {
-            color: #333;
+            margin-top: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
         }
         form {
-            margin-bottom: 20px;
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #fafafa;
         }
         label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            font-weight: bold;
         }
         input, textarea, button {
             width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        footer {
+            text-align: center;
+            padding: 10px 0;
+            background-color: #333;
+            color: #fff;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
         }
     </style>
 </head>
 <body>
     <h1>Zap - SSL Tools</h1>
+    <div class="container">
+        <form id="script1">
+            <h2>Zap - GeoTrust RapidSSL - 2025 v2.0.0</h2>
+            <label for="fqdn1">Enter Fully Qualified Domain Name (FQDN):</label>
+            <input type="text" id="fqdn1" name="fqdn" placeholder="example.com" required>
+            <button type="submit">Run Script 1</button>
+            <div id="output1"></div>
+        </form>
 
-    <form id="script1">
-        <h2>Zap - GeoTrust RapidSSL - 2025 v2.0.0</h2>
-        <label for="fqdn1">FQDN:</label>
-        <input type="text" id="fqdn1" name="fqdn">
-        <button type="submit">Run Script 1</button>
-    </form>
+        <form id="script2">
+            <h2>Zap - GeoTrust RapidSSL Wildcard - 2025 v2.0.0</h2>
+            <label for="fqdn2">Enter Fully Qualified Domain Name (Wildcard):</label>
+            <input type="text" id="fqdn2" name="fqdn" placeholder="*.example.com" required>
+            <button type="submit">Run Script 2</button>
+            <div id="output2"></div>
+        </form>
 
-    <form id="script2">
-        <h2>Zap - GeoTrust RapidSSL Wildcard - 2025 v2.0.0</h2>
-        <label for="fqdn2">FQDN:</label>
-        <input type="text" id="fqdn2" name="fqdn">
-        <button type="submit">Run Script 2</button>
-    </form>
+        <form id="script3">
+            <h2>Convert Certificate to PFX</h2>
+            <label for="certificate">Paste Certificate Content:</label>
+            <textarea id="certificate" name="certificate" rows="5" placeholder="-----BEGIN CERTIFICATE-----..." required></textarea>
+            <label for="privateKey">Paste Private Key Content:</label>
+            <textarea id="privateKey" name="privateKey" rows="5" placeholder="-----BEGIN PRIVATE KEY-----..." required></textarea>
+            <label for="pfxName">Enter Desired PFX File Name:</label>
+            <input type="text" id="pfxName" name="pfxName" placeholder="output" required>
+            <button type="submit">Run Script 3</button>
+            <div id="output3"></div>
+        </form>
+    </div>
+    <footer>
+        &copy; 2024 Zap - SSL Tools | All Rights Reserved
+    </footer>
 
-    <form id="script3">
-        <h2>Convert Certificate to PFX</h2>
-        <label>Certificate:</label>
-        <textarea name="certificate" rows="5"></textarea>
-        <label>Private Key:</label>
-        <textarea name="privateKey" rows="5"></textarea>
-        <label>PFX Name:</label>
-        <input type="text" name="pfxName">
-        <button type="submit">Run Script 3</button>
-    </form>
+    <script>
+        async function handleFormSubmit(event, endpoint, outputId) {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const data = Object.fromEntries(formData.entries());
+    const output = document.getElementById(outputId);
+    output.textContent = "Processing...";
+
+    try {
+        const response = await fetch(endpoint, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            output.textContent = `Error: ${response.status} ${response.statusText}\n${errorText}`;
+            return;
+        }
+
+        const result = await response.json();
+        output.innerHTML = `
+            <p>Files generated successfully:</p>
+            ${result.key_file ? `<a href="${result.key_file}" download>Download Key File</a><br>` : ""}
+            ${result.csr_file ? `<a href="${result.csr_file}" download>Download CSR File</a><br>` : ""}
+            ${result.pfx_file ? `<a href="${result.pfx_file}" download>Download PFX File</a>` : ""}
+        `;
+    } catch (error) {
+        output.textContent = `Error: ${error.message}`;
+    }
+}
+
+
+        document.getElementById("script1").addEventListener("submit", (e) => handleFormSubmit(e, "/run/script1", "output1"));
+        document.getElementById("script2").addEventListener("submit", (e) => handleFormSubmit(e, "/run/script2", "output2"));
+        document.getElementById("script3").addEventListener("submit", (e) => handleFormSubmit(e, "/run/script3", "output3"));
+    </script>
 </body>
 </html>

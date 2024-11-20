@@ -1,11 +1,18 @@
 from flask import Flask, request, jsonify, send_file, render_template
-import subprocess
+from flask_cors import CORS
 import os
+import subprocess
 
 app = Flask(__name__)
+CORS(app)
 
-UPLOAD_FOLDER = '/tmp'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+# Directory to store generated files
+BASE_DOWNLOAD_DIR = os.path.expanduser('~/Downloads')
+app.config['DOWNLOAD_FOLDER'] = BASE_DOWNLOAD_DIR
+
+# Ensure the base download directory exists
+if not os.path.exists(BASE_DOWNLOAD_DIR):
+    os.makedirs(BASE_DOWNLOAD_DIR, exist_ok=True)
 
 
 @app.route('/')
@@ -15,104 +22,64 @@ def homepage():
 
 @app.route('/run/script1', methods=['POST'])
 def run_script1():
-    data = request.get_json()
-    fqdn = data.get('fqdn')
-    if not fqdn:
-        return jsonify({"error": "FQDN is required"}), 400
-
-    output_dir = os.path.join(app.config['UPLOAD_FOLDER'], f"{fqdn}-2025")
-    key_file = os.path.join(output_dir, f"{fqdn}-2025.key")
-    csr_file = os.path.join(output_dir, f"{fqdn}-2025.csr")
-    os.makedirs(output_dir, exist_ok=True)
-
     try:
+        data = request.get_json()
+        fqdn = data.get('fqdn')
+        if not fqdn:
+            return jsonify({"error": "FQDN is required"}), 400
+
+        # Sanitize FQDN
+        sanitized_fqdn = fqdn.translate({ord(c): None for c in r':\/\*?"<>|'})
+        output_dir = os.path.join(app.config['DOWNLOAD_FOLDER'], f"{sanitized_fqdn}-2025")
+        os.makedirs(output_dir, exist_ok=True)
+
+        # Run script1.py to generate the files
         result = subprocess.run(
             ["python3", "./scripts/script1.py", fqdn],
             capture_output=True, text=True
         )
+
         if result.returncode != 0:
             return jsonify({"error": result.stderr.strip()}), 500
+
+        # Check for the expected output files
+        key_file = os.path.join(output_dir, f"{sanitized_fqdn}-2025.key")
+        csr_file = os.path.join(output_dir, f"{sanitized_fqdn}-2025.csr")
+        dk_file = os.path.join(output_dir, f"DK{sanitized_fqdn}-2025.key")
+
+        # Verify all files exist
+        missing_files = [
+            file for file in [key_file, csr_file, dk_file] if not os.path.exists(file)
+        ]
+        if missing_files:
+            return jsonify({"error": f"Missing files: {', '.join(missing_files)}"}), 500
 
         return jsonify({
-            "key_file": f"/download?file={key_file}",
-            "csr_file": f"/download?file={csr_file}"
+            "key_file": f"/download/{sanitized_fqdn}-2025/{sanitized_fqdn}-2025.key",
+            "csr_file": f"/download/{sanitized_fqdn}-2025/{sanitized_fqdn}-2025.csr",
+            "dk_file": f"/download/{sanitized_fqdn}-2025/DK{sanitized_fqdn}-2025.key"
         }), 200
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 
-@app.route('/run/script2', methods=['POST'])
-def run_script2():
-    data = request.get_json()
-    fqdn = data.get('fqdn')
-    if not fqdn:
-        return jsonify({"error": "FQDN is required"}), 400
-
-    output_dir = os.path.join(app.config['UPLOAD_FOLDER'], f"{fqdn}-wildcard-2025")
-    key_file = os.path.join(output_dir, f"wildcard-{fqdn}-2025.key")
-    csr_file = os.path.join(output_dir, f"wildcard-{fqdn}-2025.csr")
-    os.makedirs(output_dir, exist_ok=True)
-
+@app.route('/download/<path:filepath>', methods=['GET'])
+def download(filepath):
     try:
-        result = subprocess.run(
-            ["python3", "./scripts/script2.py", fqdn],
-            capture_output=True, text=True
-        )
-        if result.returncode != 0:
-            return jsonify({"error": result.stderr.strip()}), 500
+        directory, filename = os.path.split(filepath)
+        full_dir = os.path.join(app.config['DOWNLOAD_FOLDER'], directory)
 
-        return jsonify({
-            "key_file": f"/download?file={key_file}",
-            "csr_file": f"/download?file={csr_file}"
-        }), 200
+        # Ensure file exists before serving
+        if not os.path.exists(os.path.join(full_dir, filename)):
+            return jsonify({"error": f"File '{filename}' not found in '{full_dir}'."}), 404
+
+        return send_file(
+            os.path.join(full_dir, filename),
+            as_attachment=True
+        )
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
-
-@app.route('/run/script3', methods=['POST'])
-def run_script3():
-    data = request.get_json()
-    certificate = data.get('certificate')
-    private_key = data.get('privateKey')
-    pfx_name = data.get('pfxName')
-
-    if not all([certificate, private_key, pfx_name]):
-        return jsonify({"error": "Certificate, private key, and PFX name are required"}), 400
-
-    output_dir = app.config['UPLOAD_FOLDER']
-    pfx_file = os.path.join(output_dir, f"{pfx_name}.pfx")
-
-    cert_file = os.path.join(output_dir, "temp_cert.pem")
-    key_file = os.path.join(output_dir, "temp_key.pem")
-    try:
-        with open(cert_file, "w") as f:
-            f.write(certificate)
-        with open(key_file, "w") as f:
-            f.write(private_key)
-
-        result = subprocess.run(
-            ["python3", "./scripts/script3.py", cert_file, key_file, pfx_name],
-            capture_output=True, text=True
-        )
-
-        os.remove(cert_file)
-        os.remove(key_file)
-
-        if result.returncode != 0:
-            return jsonify({"error": result.stderr.strip()}), 500
-
-        return jsonify({"pfx_file": f"/download?file={pfx_file}"}), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
-@app.route('/download', methods=['GET'])
-def download_file():
-    file_path = request.args.get('file')
-    if not file_path or not os.path.exists(file_path):
-        return jsonify({"error": "File not found"}), 404
-
-    return send_file(file_path, as_attachment=True)
 
 
 if __name__ == '__main__':
