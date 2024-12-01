@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ssl-automation-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ssl-automation
+  template:
+    metadata:
+      labels:
+        app: ssl-automation
+    spec:
+      containers:
+      - name: ssl-automation
+        image: ssl-automation-app:latest
+        ports:
+        - containerPort: 4000
+        env:
+        - name: DOWNLOAD_FOLDER
+          value: "/app/Downloads"
