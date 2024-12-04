@@ -22,22 +22,31 @@ def main():
     subject = f"/C=IL/ST=Merkaz/L=Petah Tikva/O=Zap Group ltd/OU=IT Department/CN={fqdn}"
 
     try:
-        # Generate private key and CSR
+        # Generate the private key and CSR
         subprocess.run(
             ["openssl", "req", "-new", "-newkey", "rsa:2048", "-nodes",
              "-keyout", key_file, "-out", csr_file, "-subj", subject],
             check=True
         )
 
-        # Generate DK file
+        # Generate the decrypted DK file
         subprocess.run(
             ["openssl", "rsa", "-in", key_file, "-out", dk_key_file],
             check=True
         )
 
+        # Ensure all files have no trailing blank line
+        for file_path in [key_file, csr_file, dk_key_file]:
+            with open(file_path, 'r+', newline='\n') as f:
+                content = f.read().rstrip()  # Remove trailing whitespace/newlines
+                f.seek(0)
+                f.write(content)
+                f.truncate()  # Remove anything beyond the new end of the file
+
         print("All files generated successfully!")
+        print(f"Files are located in the directory: {output_dir}")
     except subprocess.CalledProcessError as e:
-        print(f"Error: {e}")
+        print(f"Error: Failed to generate files. {e}")
         sys.exit(1)
 
 if __name__ == "__main__":
