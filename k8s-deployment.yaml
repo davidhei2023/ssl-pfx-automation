@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: ssl-automation
-        image: ssl-automation-app:latest
+        image: davidhei/ssl-automation-app:latest
         ports:
         - containerPort: 4000
         env:
