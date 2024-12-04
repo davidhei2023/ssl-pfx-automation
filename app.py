@@ -2,154 +2,141 @@ from flask import Flask, request, jsonify, send_file, render_template
 from flask_cors import CORS
 import os
 import subprocess
-import tempfile
 import zipfile
+import tempfile
 
 app = Flask(__name__)
 CORS(app)
 
-BASE_DOWNLOAD_DIR = os.path.expanduser("~/Downloads")
-app.config["DOWNLOAD_FOLDER"] = BASE_DOWNLOAD_DIR
+# Directory to store generated files
+BASE_DOWNLOAD_DIR = os.path.expanduser('~/Downloads')
+app.config['DOWNLOAD_FOLDER'] = BASE_DOWNLOAD_DIR
 
 # Ensure the base download directory exists
 if not os.path.exists(BASE_DOWNLOAD_DIR):
     os.makedirs(BASE_DOWNLOAD_DIR, exist_ok=True)
 
 
-@app.route("/")
+@app.route('/')
 def homepage():
-    return render_template("index.html")
+    return render_template('index.html')
 
 
-def create_zip(output_dir, fqdn):
-    """Create a ZIP file containing all generated files."""
-    zip_filename = os.path.join(output_dir, f"{fqdn}-2025.zip")
-    with zipfile.ZipFile(zip_filename, "w") as zipf:
-        for root, _, files in os.walk(output_dir):
-            for file in files:
-                file_path = os.path.join(root, file)
-                zipf.write(file_path, os.path.relpath(file_path, output_dir))
-    return zip_filename
-
-
-@app.route("/run/script1", methods=["POST"])
+@app.route('/run/script1', methods=['POST'])
 def run_script1():
     try:
         data = request.get_json()
-        fqdn = data.get("fqdn")
+        fqdn = data.get('fqdn')
         if not fqdn:
             return jsonify({"error": "FQDN is required"}), 400
 
-        sanitized_fqdn = fqdn.translate({ord(c): None for c in r":\/\*?\"<>|"})
-        output_dir = os.path.join(app.config["DOWNLOAD_FOLDER"], f"{sanitized_fqdn}-2025")
-        os.makedirs(output_dir, exist_ok=True)
+        sanitized_fqdn = fqdn.translate({ord(c): None for c in r':\/\*?"<>|'})
+        output_dir = os.path.join(app.config['DOWNLOAD_FOLDER'], f"{sanitized_fqdn}-2025")
 
-        # Run script1.py
+        # Run the script
         result = subprocess.run(
             ["python3", "./scripts/script1.py", fqdn],
             capture_output=True, text=True
         )
+
         if result.returncode != 0:
             return jsonify({"error": result.stderr.strip()}), 500
 
-        # Create a ZIP archive
-        zip_file = create_zip(output_dir, sanitized_fqdn)
+        # Create a zip file
+        zip_path = os.path.join(app.config['DOWNLOAD_FOLDER'], f"{sanitized_fqdn}-2025.zip")
+        with zipfile.ZipFile(zip_path, 'w') as zipf:
+            for root, _, files in os.walk(output_dir):
+                for file in files:
+                    file_path = os.path.join(root, file)
+                    zipf.write(file_path, os.path.relpath(file_path, output_dir))
 
-        return jsonify({
-            "zip_file": f"/download/{sanitized_fqdn}-2025/{os.path.basename(zip_file)}",
-            "message": "Script 1 executed successfully and files are zipped."
-        }), 200
+        return jsonify({"download_url": f"/download/{sanitized_fqdn}-2025.zip"}), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 
-@app.route("/run/script2", methods=["POST"])
+@app.route('/run/script2', methods=['POST'])
 def run_script2():
     try:
         data = request.get_json()
-        fqdn = data.get("fqdn")
+        fqdn = data.get('fqdn')
         if not fqdn:
             return jsonify({"error": "FQDN is required"}), 400
 
-        sanitized_fqdn = fqdn.translate({ord(c): None for c in r":\/\*?\"<>|"})
-        output_dir = os.path.join(app.config["DOWNLOAD_FOLDER"], f"{sanitized_fqdn}-wildcard-2025")
-        os.makedirs(output_dir, exist_ok=True)
+        sanitized_fqdn = fqdn.translate({ord(c): None for c in r':\/\*?"<>|'})
+        output_dir = os.path.join(app.config['DOWNLOAD_FOLDER'], f"{sanitized_fqdn}-wildcard-2025")
 
-        # Run script2.py
+        # Run the script
         result = subprocess.run(
             ["python3", "./scripts/script2.py", fqdn],
             capture_output=True, text=True
         )
+
         if result.returncode != 0:
             return jsonify({"error": result.stderr.strip()}), 500
 
-        # Create a ZIP archive
-        zip_file = create_zip(output_dir, sanitized_fqdn)
+        # Create a zip file
+        zip_path = os.path.join(app.config['DOWNLOAD_FOLDER'], f"{sanitized_fqdn}-wildcard-2025.zip")
+        with zipfile.ZipFile(zip_path, 'w') as zipf:
+            for root, _, files in os.walk(output_dir):
+                for file in files:
+                    file_path = os.path.join(root, file)
+                    zipf.write(file_path, os.path.relpath(file_path, output_dir))
 
-        return jsonify({
-            "zip_file": f"/download/{sanitized_fqdn}-wildcard-2025/{os.path.basename(zip_file)}",
-            "message": "Script 2 executed successfully and files are zipped."
-        }), 200
+        return jsonify({"download_url": f"/download/{sanitized_fqdn}-wildcard-2025.zip"}), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 
-@app.route("/run/script3", methods=["POST"])
+@app.route('/run/script3', methods=['POST'])
 def run_script3():
     try:
         data = request.get_json()
-        cert_content = data.get("cert_content")
-        key_content = data.get("key_content")
-        pfx_output_name = data.get("pfx_output")
+        cert_content = data.get('certificate')
+        key_content = data.get('private_key')
+        pfx_name = data.get('pfx_name')
 
-        if not cert_content or not key_content or not pfx_output_name:
+        if not cert_content or not key_content or not pfx_name:
             return jsonify({"error": "All fields are required"}), 400
 
-        temp_dir = tempfile.gettempdir()
-        cert_file = os.path.join(temp_dir, "cert.pem")
-        key_file = os.path.join(temp_dir, "key.pem")
-        pfx_output_file = os.path.join(app.config["DOWNLOAD_FOLDER"], f"{pfx_output_name}.pfx")
+        pfx_file = os.path.join(app.config['DOWNLOAD_FOLDER'], f"{pfx_name}.pfx")
 
-        with open(cert_file, "w", encoding="utf-8") as cf, open(key_file, "w", encoding="utf-8") as kf:
-            cf.write(cert_content.strip())
-            kf.write(key_content.strip())
+        # Create temporary files for the certificate and private key
+        with tempfile.NamedTemporaryFile(delete=False) as cert_file, tempfile.NamedTemporaryFile(delete=False) as key_file:
+            cert_file.write(cert_content.encode())
+            key_file.write(key_content.encode())
 
-        result = subprocess.run(
-            ["openssl", "pkcs12", "-export", "-out", pfx_output_file,
-             "-inkey", key_file, "-in", cert_file, "-password", "pass:Aa1234"],
-            capture_output=True, text=True
-        )
+        try:
+            # Run OpenSSL to create the PFX file
+            subprocess.run(
+                ["openssl", "pkcs12", "-export", "-out", pfx_file,
+                 "-inkey", key_file.name, "-in", cert_file.name, "-password", "pass:Aa1234"],
+                check=True
+            )
+        finally:
+            # Clean up temporary files
+            os.unlink(cert_file.name)
+            os.unlink(key_file.name)
 
-        if result.returncode != 0:
-            return jsonify({"error": f"OpenSSL error: {result.stderr.strip()}"}), 500
-
-        return jsonify({
-            "pfx_file": f"/download/{os.path.basename(pfx_output_file)}",
-            "message": "PFX file created successfully."
-        }), 200
+        return jsonify({"download_url": f"/download/{pfx_name}.pfx"}), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 
-@app.route("/download/<path:filepath>", methods=["GET"])
-def download(filepath):
+@app.route('/download/<path:filename>', methods=['GET'])
+def download(filename):
     try:
-        directory, filename = os.path.split(filepath)
-        full_dir = os.path.join(app.config["DOWNLOAD_FOLDER"], directory)
+        file_path = os.path.join(app.config['DOWNLOAD_FOLDER'], filename)
+        if not os.path.exists(file_path):
+            return jsonify({"error": "File not found"}), 404
 
-        if not os.path.exists(os.path.join(full_dir, filename)):
-            return jsonify({"error": f"File '{filename}' not found in '{full_dir}'."}), 404
-
-        return send_file(
-            os.path.join(full_dir, filename),
-            as_attachment=True
-        )
+        return send_file(file_path, as_attachment=True)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=4000, debug=True)
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=4000, debug=True)

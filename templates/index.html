@@ -3,171 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zap - GeoTrust SSL Automation</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f9;
-            color: #333;
-        }
-
-        h1 {
-            text-align: center;
-            color: #0056b3;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: 20px auto;
-            background: #ffffff;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .script-section {
-            margin-bottom: 30px;
-        }
-
-        .script-section h2 {
-            font-size: 1.5em;
-            margin-bottom: 10px;
-            color: #0056b3;
-        }
-
-        .script-section label {
-            display: block;
-            margin-top: 10px;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-
-        .script-section input,
-        .script-section textarea {
-            width: 100%;
-            padding: 8px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-
-        .script-section button {
-            background-color: #0056b3;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            cursor: pointer;
-            border-radius: 4px;
-            font-size: 1em;
-        }
-
-        .script-section button:hover {
-            background-color: #003d80;
-        }
-
-        .result {
-            margin-top: 15px;
-            background: #e9f5ff;
-            padding: 15px;
-            border: 1px solid #cce4ff;
-            border-radius: 4px;
-        }
-
-        .result a {
-            color: #0056b3;
-            text-decoration: none;
-            margin-right: 10px;
-        }
-
-        .result a:hover {
-            text-decoration: underline;
-        }
-    </style>
+    <title>SSL Certificate Automation</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
 <body>
-    <h1>Zap - GeoTrust SSL Automation</h1>
-    <div class="container">
-        <!-- Script 1 -->
-        <div class="script-section">
-            <h2>Script 1: GeoTrust RapidSSL</h2>
-            <form id="script1-form">
-                <label for="fqdn1">Enter Fully Qualified Domain Name (FQDN):</label>
-                <input type="text" id="fqdn1" name="fqdn" placeholder="e.g., example.com" required>
-                <button type="submit">Run Script 1</button>
-            </form>
-            <div id="script1-result" class="result"></div>
+    <div class="container mt-5">
+        <h1 class="text-center">Zap - GeoTrust SSL Automation</h1>
+
+        <div class="card mt-4">
+            <div class="card-header">Script 1: GeoTrust RapidSSL</div>
+            <div class="card-body">
+                <input type="text" id="fqdn1" class="form-control mb-3" placeholder="Enter Fully Qualified Domain Name (FQDN)">
+                <button class="btn btn-primary" onclick="runScript1()">Run Script 1</button>
+                <div id="output1" class="mt-3"></div>
+            </div>
         </div>
 
-        <!-- Script 2 -->
-        <div class="script-section">
-            <h2>Script 2: GeoTrust Wildcard</h2>
-            <form id="script2-form">
-                <label for="fqdn2">Enter Fully Qualified Domain Name (FQDN):</label>
-                <input type="text" id="fqdn2" name="fqdn" placeholder="e.g., *.example.com" required>
-                <button type="submit">Run Script 2</button>
-            </form>
-            <div id="script2-result" class="result"></div>
+        <div class="card mt-4">
+            <div class="card-header">Script 2: GeoTrust Wildcard</div>
+            <div class="card-body">
+                <input type="text" id="fqdn2" class="form-control mb-3" placeholder="Enter Fully Qualified Domain Name (FQDN)">
+                <button class="btn btn-primary" onclick="runScript2()">Run Script 2</button>
+                <div id="output2" class="mt-3"></div>
+            </div>
         </div>
 
-        <!-- Script 3 -->
-        <div class="script-section">
-            <h2>Script 3: Convert to PFX</h2>
-            <form id="script3-form">
-                <label for="cert_content">Certificate Content:</label>
-                <textarea id="cert_content" name="cert_content" placeholder="Paste your certificate content here..." required></textarea>
-                <label for="key_content">Private Key Content:</label>
-                <textarea id="key_content" name="key_content" placeholder="Paste your private key content here..." required></textarea>
-                <label for="pfx_output">PFX Output Name:</label>
-                <input type="text" id="pfx_output" name="pfx_output" placeholder="e.g., mycertificate" required>
-                <button type="submit">Run Script 3</button>
-            </form>
-            <div id="script3-result" class="result"></div>
+        <div class="card mt-4">
+            <div class="card-header">Script 3: Convert to PFX</div>
+            <div class="card-body">
+                <textarea id="certificate" class="form-control mb-3" placeholder="Paste Certificate Content"></textarea>
+                <textarea id="private_key" class="form-control mb-3" placeholder="Paste Private Key Content"></textarea>
+                <input type="text" id="pfx_name" class="form-control mb-3" placeholder="Enter PFX Output File Name">
+                <button class="btn btn-primary" onclick="runScript3()">Run Script 3</button>
+                <div id="output3" class="mt-3"></div>
+            </div>
         </div>
     </div>
 
     <script>
-        async function runScript(e, formId, resultId, endpoint) {
-            e.preventDefault();
-            const form = document.getElementById(formId);
-            const data = Object.fromEntries(new FormData(form));
-            const resultDiv = document.getElementById(resultId);
-
+        async function runScript1() {
+            const fqdn = document.getElementById('fqdn1').value;
+            if (!fqdn) {
+                alert("Please enter a valid FQDN");
+                return;
+            }
+            document.getElementById('output1').innerHTML = "Processing...";
             try {
-                const response = await fetch(endpoint, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data),
-                });
-                const result = await response.json();
-                if (response.ok) {
-                    let linksHtml = "";
-                    if (result.zip_file) {
-                        linksHtml += `<a href="${result.zip_file}" download>Download ZIP</a>`;
-                    } else {
-                        for (const [label, link] of Object.entries(result)) {
-                            linksHtml += `<a href="${link}" download>Download ${label.replace("_", " ")}</a>`;
-                        }
-                    }
-                    resultDiv.innerHTML = linksHtml;
-                } else {
-                    resultDiv.innerHTML = `<span style="color:red;">Error: ${result.error || 'Unknown error occurred'}</span>`;
-                }
+                const response = await axios.post('/run/script1', { fqdn });
+                document.getElementById('output1').innerHTML = `
+                    <a href="${response.data.download_url}" class="btn btn-success" download>Download ZIP</a>
+                `;
             } catch (error) {
-                resultDiv.innerHTML = `<span style="color:red;">Error: ${error.message}</span>`;
+                document.getElementById('output1').innerHTML = "Error: " + error.response.data.error;
             }
         }
 
-        document.getElementById('script1-form').addEventListener('submit', (e) =>
-            runScript(e, 'script1-form', 'script1-result', '/run/script1')
-        );
-        document.getElementById('script2-form').addEventListener('submit', (e) =>
-            runScript(e, 'script2-form', 'script2-result', '/run/script2')
-        );
-        document.getElementById('script3-form').addEventListener('submit', (e) =>
-            runScript(e, 'script3-form', 'script3-result', '/run/script3')
-        );
+        async function runScript2() {
+            const fqdn = document.getElementById('fqdn2').value;
+            if (!fqdn) {
+                alert("Please enter a valid FQDN");
+                return;
+            }
+            document.getElementById('output2').innerHTML = "Processing...";
+            try {
+                const response = await axios.post('/run/script2', { fqdn });
+                document.getElementById('output2').innerHTML = `
+                    <a href="${response.data.download_url}" class="btn btn-success" download>Download ZIP</a>
+                `;
+            } catch (error) {
+                document.getElementById('output2').innerHTML = "Error: " + error.response.data.error;
+            }
+        }
+
+        async function runScript3() {
+            const certificate = document.getElementById('certificate').value;
+            const privateKey = document.getElementById('private_key').value;
+            const pfxName = document.getElementById('pfx_name').value;
+            if (!certificate || !privateKey || !pfxName) {
+                alert("All fields are required");
+                return;
+            }
+            document.getElementById('output3').innerHTML = "Processing...";
+            try {
+                const response = await axios.post('/run/script3', {
+                    certificate,
+                    private_key: privateKey,
+                    pfx_name: pfxName
+                });
+                document.getElementById('output3').innerHTML = `
+                    <a href="${response.data.download_url}" class="btn btn-success" download>Download PFX</a>
+                `;
+            } catch (error) {
+                document.getElementById('output3').innerHTML = "Error: " + error.response.data.error;
+            }
+        }
     </script>
 </body>
 </html>
