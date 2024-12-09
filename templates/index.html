@@ -12,30 +12,30 @@
         <h1 class="text-center">Zap - GeoTrust SSL Automation</h1>
 
         <div class="card mt-4">
-            <div class="card-header">Script 1: GeoTrust RapidSSL</div>
+            <div class="card-header">Option 1: GeoTrust RapidSSL</div>
             <div class="card-body">
                 <input type="text" id="fqdn1" class="form-control mb-3" placeholder="Enter Fully Qualified Domain Name (FQDN)">
-                <button class="btn btn-primary" onclick="runScript1()">Run Script 1</button>
+                <button class="btn btn-primary" onclick="runScript1()">Run Script</button>
                 <div id="output1" class="mt-3"></div>
             </div>
         </div>
 
         <div class="card mt-4">
-            <div class="card-header">Script 2: GeoTrust Wildcard</div>
+            <div class="card-header">Option 2: GeoTrust RapidSSL Wildcard</div>
             <div class="card-body">
                 <input type="text" id="fqdn2" class="form-control mb-3" placeholder="Enter Fully Qualified Domain Name (FQDN)">
-                <button class="btn btn-primary" onclick="runScript2()">Run Script 2</button>
+                <button class="btn btn-primary" onclick="runScript2()">Run Script</button>
                 <div id="output2" class="mt-3"></div>
             </div>
         </div>
 
         <div class="card mt-4">
-            <div class="card-header">Script 3: Convert to PFX</div>
+            <div class="card-header">Convert to PFX</div>
             <div class="card-body">
-                <textarea id="certificate" class="form-control mb-3" placeholder="Paste Certificate Content"></textarea>
-                <textarea id="private_key" class="form-control mb-3" placeholder="Paste Private Key Content"></textarea>
-                <input type="text" id="pfx_name" class="form-control mb-3" placeholder="Enter PFX Output File Name">
-                <button class="btn btn-primary" onclick="runScript3()">Run Script 3</button>
+                <textarea id="certificate" class="form-control mb-3" placeholder="Paste Certificate Content From Enom Website"></textarea>
+                <textarea id="private_key" class="form-control mb-3" placeholder="Paste DK Private Key Content Previously Generated"></textarea>
+                <input type="text" id="pfx_name" class="form-control mb-3" placeholder="Enter PFX Output File Name (the FQDN)">
+                <button class="btn btn-primary" onclick="runScript3()">Run Script</button>
                 <div id="output3" class="mt-3"></div>
             </div>
         </div>
