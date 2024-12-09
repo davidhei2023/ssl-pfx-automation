@@ -5,7 +5,7 @@ import subprocess
 import zipfile
 import tempfile
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="static")
 CORS(app)
 
 # Directory to store generated files
