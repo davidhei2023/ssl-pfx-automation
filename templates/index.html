@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zap - SSL Automation</title>
+    <title>SSL Automation</title>
     <link rel="icon" href="/static/ssl-icon2.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -12,7 +12,7 @@
     <div class="container mt-5">
         <div class="d-flex align-items-center">
             <img src="/static/ssl-icon2.ico" alt="Zap SSL Logo" width="50" height="50" class="me-3">
-            <h1 class="text-center">Zap - GeoTrust SSL Automation</h1>
+            <h1 class="text-center">GeoTrust SSL Automation</h1>
         </div>
 
         <!-- Row 1: Script 1 and Script 2 -->
@@ -20,7 +20,7 @@
             <!-- Script 1 -->
             <div class="col-md-6">
                 <div class="card">
-                    <div class="card-header">Script 1: GeoTrust RapidSSL</div>
+                    <div class="card-header">ZAP ONLY: GeoTrust RapidSSL</div>
                     <div class="card-body">
                         <input type="text" id="fqdn1" class="form-control mb-3" placeholder="Enter Fully Qualified Domain Name (FQDN)">
                         <button class="btn btn-primary" onclick="runScript1()">Run Script 1</button>
@@ -32,7 +32,7 @@
             <!-- Script 2 -->
             <div class="col-md-6">
                 <div class="card">
-                    <div class="card-header">Script 2: GeoTrust Wildcard</div>
+                    <div class="card-header">ZAP ONLY: GeoTrust * Wildcard *</div>
                     <div class="card-body">
                         <input type="text" id="fqdn2" class="form-control mb-3" placeholder="Enter Fully Qualified Domain Name (FQDN)">
                         <button class="btn btn-primary" onclick="runScript2()">Run Script 2</button>
@@ -47,7 +47,7 @@
             <!-- Script 6 -->
             <div class="col-md-6">
                 <div class="card">
-                    <div class="card-header">Script 6: Generate Custom CSR</div>
+                    <div class="card-header">All Other Websites: Generate Custom CSR</div>
                     <div class="card-body">
                         <input type="text" id="fqdn6" class="form-control mb-3" placeholder="Enter Fully Qualified Domain Name (FQDN)">
                         <input type="text" id="country6" class="form-control mb-3" placeholder="Enter Country Code (e.g., IL)">
@@ -64,11 +64,11 @@
             <!-- Script 3 -->
             <div class="col-md-6">
                 <div class="card">
-                    <div class="card-header">Script 3: Convert to PFX</div>
+                    <div class="card-header">After CSR has been approved: Convert to PFX</div>
                     <div class="card-body">
-                        <textarea id="certificate" class="form-control mb-3" placeholder="Paste Certificate Content"></textarea>
-                        <textarea id="private_key" class="form-control mb-3" placeholder="Paste Private Key Content"></textarea>
-                        <input type="text" id="pfx_name" class="form-control mb-3" placeholder="Enter PFX Output File Name">
+                        <textarea id="certificate" class="form-control mb-3" placeholder="Paste Certificate Content From Enom Website"></textarea>
+                        <textarea id="private_key" class="form-control mb-3" placeholder="Paste DK Private Key Content Previously Generated"></textarea>
+                        <input type="text" id="pfx_name" class="form-control mb-3" placeholder="Enter PFX Output File Name (the FQDN)">
                         <button class="btn btn-primary" onclick="runScript3()">Run Script 3</button>
                         <div id="output3" class="mt-3"></div>
                     </div>
