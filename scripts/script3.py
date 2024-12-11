@@ -22,16 +22,27 @@ def main():
         kf.write(key_content.strip())
 
     try:
-        subprocess.run(["openssl", "pkcs12", "-export", "-out", pfx_file,
-                        "-inkey", key_file, "-in", cert_file, "-password", "pass:Aa1234"], check=True)
+        subprocess.run(
+            ["openssl", "pkcs12", "-export", "-out", pfx_file,
+             "-inkey", key_file, "-in", cert_file, "-password", "pass:Aa1234"],
+            check=True, capture_output=True, text=True
+        )
         print(f"Successfully created {pfx_file}")
     except subprocess.CalledProcessError as e:
-        print(f"Error: {e}")
+        error_output = e.stderr.lower()
+        if "unable to load private key" in error_output:
+            print("Error: The provided private key is invalid or does not match the certificate.")
+        elif "no certificate matches private key" in error_output:
+            print("Error: The certificate and private key do not match.")
+        elif "openssl" in error_output:
+            print("Error: OpenSSL error occurred. Please verify the input.")
+        else:
+            print("Error: An unknown error occurred during PFX creation.")
         sys.exit(1)
     finally:
         os.remove(cert_file)
         os.remove(key_file)
 
+
 if __name__ == "__main__":
     main()
-
