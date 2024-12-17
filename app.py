@@ -101,7 +101,7 @@ def run_script3():
         if not cert_content or not key_content or not pfx_name:
             return jsonify({"error": "All fields are required"}), 400
 
-        pfx_file = os.path.join(app.config['DOWNLOAD_FOLDER'], f"{pfx_name}.pfx")
+        pfx_file = os.path.join(app.config['DOWNLOAD_FOLDER'], f"{pfx_name}-2025.pfx")
 
         # Create temporary files for the certificate and private key
         with tempfile.NamedTemporaryFile(delete=False, mode='w') as cert_file, \
@@ -115,7 +115,7 @@ def run_script3():
             # Run OpenSSL to create the PFX file
             result = subprocess.run(
                 ["openssl", "pkcs12", "-export", "-out", pfx_file,
-                 "-inkey", key_file.name, "-in", cert_file.name, "-password", f"pass:{os.getenv('PFX_PASSWORD', 'Aa1234')}"],
+                 "-inkey", key_file.name, "-in", cert_file.name, "-password", f"pass:{os.getenv('PFX_PASSWORD')}"],
                 capture_output=True, text=True, check=True
             )
         except subprocess.CalledProcessError as e:
