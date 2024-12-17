@@ -133,7 +133,7 @@ def run_script3():
             os.unlink(cert_file.name)
             os.unlink(key_file.name)
 
-        return jsonify({"download_url": f"/download/{pfx_name}.pfx"}), 200
+        return jsonify({"download_url": f"/download/{pfx_name}-2025.pfx"}), 200
 
     except Exception as e:
         return jsonify({"error": "An unexpected error occurred. Please try again."}), 500
