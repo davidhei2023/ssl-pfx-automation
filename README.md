@@ -1,8 +1,8 @@
-[ssl.tcc2.net](https://ssl.tcc2.net)
+[<a href="https://ssl.tcc2.net" target="_blank">ssl.tcc2.net</a>](https://ssl.tcc2.net)
 
 # SSL PFX Automation
 
-This project was developed for **Zap.co.il**, a major customer of **TripleC**, to streamline the management and renewal of SSL certificates. With approximately 50 certificates requiring renewal each month, manual handling became inefficient and error-prone. 
+This project was developed for **Za**, a major customer of **TripleC**, to streamline the management and renewal of SSL certificates. With approximately 50 certificates requiring renewal each month, manual handling became inefficient and error-prone. 
 
 To address this challenge, we built an automated solution to:
 
