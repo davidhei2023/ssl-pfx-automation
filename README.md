@@ -43,7 +43,7 @@ By automating the certificate lifecycle, we help Zap.co.il and any other website
 ### Benefits of PFX for Web Servers
 PFX files offer a secure, all-in-one solution for storing certificates and private keys, making them easy to deploy across web servers and ensuring seamless SSL/TLS encryption.
 
-Contact for more information:
-David Heimenrath
-+972-523678942
-davidhei2010@gmail.com
+### Contact for More Information:
+David Heimenrath  
+📞 +972-523678942  
+📧 [davidhei2010@gmail.com](mailto:davidhei2010@gmail.com)
