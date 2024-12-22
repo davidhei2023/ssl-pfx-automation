@@ -47,3 +47,5 @@ PFX files offer a secure, all-in-one solution for storing certificates and priva
 David Heimenrath  
 📞 +972-523678942  
 📧 [davidhei2010@gmail.com](mailto:davidhei2010@gmail.com)
+🔗 [LinkedIn: davidhei](https://www.linkedin.com/in/davidhei)
+
