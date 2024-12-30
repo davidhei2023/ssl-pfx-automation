@@ -153,6 +153,10 @@ def run_script6():
         if not all([fqdn, country, state, locality, organization, organizational_unit]):
             return jsonify({"error": "All fields are required"}), 400
 
+        # Validate country code length
+        if len(country) > 2:
+            return jsonify({"error": "Country code cannot be more than 2 letters"}), 400
+
         sanitized_fqdn = fqdn.translate({ord(c): None for c in r':\/\*?"<>|'})
         output_dir = os.path.join(app.config['DOWNLOAD_FOLDER'], f"{sanitized_fqdn}-2025")
 

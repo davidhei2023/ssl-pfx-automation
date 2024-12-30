@@ -100,6 +100,10 @@
             border: 1px solid #e3e3e3;
             border-radius: 8px;
         }
+
+        .text-danger {
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
@@ -143,7 +147,9 @@
                     <div class="card-header">All Other Websites: Generate Custom CSR</div>
                     <div class="card-body">
                         <input type="text" id="fqdn6" class="form-control mb-3" placeholder="Enter Fully Qualified Domain Name (FQDN)">
-                        <input type="text" id="country6" class="form-control mb-3" placeholder="Enter Country Code (e.g., IL)">
+                        <input type="text" id="country6" class="form-control mb-3" placeholder="Enter Country Code (e.g., IL)" maxlength="2"
+                            oninput="validateCountryCode(this)">
+                        <small id="country6Error" class="text-danger" style="display: none;">Country code cannot be more than 2 letters.</small>
                         <input type="text" id="state6" class="form-control mb-3" placeholder="Enter State/Province">
                         <input type="text" id="locality6" class="form-control mb-3" placeholder="Enter Locality/City">
                         <input type="text" id="organization6" class="form-control mb-3" placeholder="Enter Organization Name">
@@ -174,6 +180,16 @@
     </div>
 
     <script>
+        // Function to validate country code
+        function validateCountryCode(input) {
+            const errorElement = document.getElementById('country6Error');
+            if (input.value.length > 2) {
+                errorElement.style.display = 'block';
+            } else {
+                errorElement.style.display = 'none';
+            }
+        }
+
         async function runScript1() {
             const fqdn = document.getElementById('fqdn1').value;
             if (!fqdn) {
