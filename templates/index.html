@@ -144,7 +144,7 @@
         <div class="row mt-4">
             <div class="col-md-6">
                 <div class="card">
-                    <div class="card-header">All Other Websites: Generate Custom CSR</div>
+                    <div class="card-header">All Other Websites: Generate Custom CSR + Key</div>
                     <div class="card-body">
                         <input type="text" id="fqdn6" class="form-control mb-3" placeholder="Enter Fully Qualified Domain Name (FQDN)">
                         <input type="text" id="country6" class="form-control mb-3" placeholder="Enter Country Code (e.g., IL)" maxlength="2"
@@ -165,7 +165,7 @@
                     <div class="card-header">After CSR has been approved: Convert to PFX</div>
                     <div class="card-body">
                         <textarea id="certificate" class="form-control mb-3" placeholder="Paste Verified Certificate Content From Enom Website"></textarea>
-                        <textarea id="private_key" class="form-control mb-3" placeholder="Paste DK Private Key Content Previously Generated (for IIS use the regular private key)"></textarea>
+                        <textarea id="private_key" class="form-control mb-3" placeholder="Paste DK Private Key Content Previously Generated"></textarea>
                         <input type="text" id="pfx_name" class="form-control mb-3" placeholder="Enter PFX Output File Name (the FQDN)">
                         <button class="btn btn-primary w-100" onclick="runScript3()">Run Script</button>
                         <div id="output3" class="mt-3"></div>
