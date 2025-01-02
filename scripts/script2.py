@@ -1,6 +1,10 @@
 import os
 import subprocess
 import sys
+from dotenv import load_dotenv
+
+# Load the environment variables from .env
+load_dotenv()
 
 def main():
     if len(sys.argv) < 2:
@@ -19,19 +23,25 @@ def main():
     csr_file = os.path.join(output_dir, f"wildcard-{sanitized_fqdn}-2025.csr")
     dk_key_file = os.path.join(output_dir, f"DKwildcard-{sanitized_fqdn}-2025.key")
 
+    # Get the passphrase from the .env file
+    passphrase = os.getenv('PASSPHRASE')
+    if not passphrase:
+        print("Error: PASSPHRASE is not set in the .env file")
+        sys.exit(1)
+
     subject = f"/C=IL/ST=Merkaz/L=Petah Tikva/O=Zap Group ltd/OU=IT/CN={fqdn}"
 
     try:
-        # Generate the private key and CSR
+        # Generate the private key and CSR with passphrase
         subprocess.run(
-            ["openssl", "req", "-new", "-newkey", "rsa:2048", "-nodes",
-             "-keyout", key_file, "-out", csr_file, "-subj", subject],
+            ["openssl", "req", "-new", "-newkey", "rsa:2048",
+             "-keyout", key_file, "-out", csr_file, "-subj", subject, "-passout", f"pass:{passphrase}"],
             check=True
         )
 
-        # Generate the decrypted DK file
+        # Generate the decrypted DK file (without passphrase)
         subprocess.run(
-            ["openssl", "rsa", "-in", key_file, "-out", dk_key_file],
+            ["openssl", "rsa", "-in", key_file, "-out", dk_key_file, "-passin", f"pass:{passphrase}"],
             check=True
         )
 
@@ -51,4 +61,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
