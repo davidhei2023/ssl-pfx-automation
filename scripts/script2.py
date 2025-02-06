@@ -2,6 +2,7 @@ import os
 import subprocess
 import sys
 from dotenv import load_dotenv
+import tempfile
 
 # Load the environment variables from .env
 load_dotenv()
@@ -32,18 +33,26 @@ def main():
     subject = f"/C=IL/ST=Merkaz/L=Petah Tikva/O=Zap Group ltd/OU=IT/CN={fqdn}"
 
     try:
+        # Use a temporary file for the passphrase to avoid exposure in command-line
+        with tempfile.NamedTemporaryFile(delete=False, mode="w") as pass_file:
+            pass_file.write(passphrase)
+            pass_file.flush()
+
         # Generate the private key and CSR with passphrase
         subprocess.run(
             ["openssl", "req", "-new", "-newkey", "rsa:2048",
-             "-keyout", key_file, "-out", csr_file, "-subj", subject, "-passout", f"pass:{passphrase}"],
+             "-keyout", key_file, "-out", csr_file, "-subj", subject, "-passout", f"file:{pass_file.name}"],
             check=True
         )
 
         # Generate the decrypted DK file (without passphrase)
         subprocess.run(
-            ["openssl", "rsa", "-in", key_file, "-out", dk_key_file, "-passin", f"pass:{passphrase}"],
+            ["openssl", "rsa", "-in", key_file, "-out", dk_key_file, "-passin", f"file:{pass_file.name}"],
             check=True
         )
+
+        # Remove temporary passphrase file
+        os.unlink(pass_file.name)
 
         # Ensure all files have no trailing blank line
         for file_path in [key_file, csr_file, dk_key_file]:
@@ -55,6 +64,7 @@ def main():
 
         print("All files generated successfully!")
         print(f"Files are located in the directory: {output_dir}")
+
     except subprocess.CalledProcessError as e:
         print(f"Error: Failed to generate files. {e}")
         sys.exit(1)

@@ -2,6 +2,7 @@ import os
 import subprocess
 import sys
 from dotenv import load_dotenv
+import tempfile
 
 # Load the environment variables from .env
 load_dotenv()
@@ -38,20 +39,28 @@ def main():
     subject = f"/C={country}/ST={state}/L={locality}/O={organization}/OU={organizational_unit}/CN={fqdn}"
 
     try:
+        # Use a temporary file for passphrase to avoid command-line exposure
+        with tempfile.NamedTemporaryFile(delete=False, mode="w") as pass_file:
+            pass_file.write(passphrase)
+            pass_file.flush()
+
         # Generate the private key and CSR with passphrase
         subprocess.run(
             ["openssl", "req", "-new", "-newkey", "rsa:2048",
-             "-keyout", key_file, "-out", csr_file, "-subj", subject, "-passout", f"pass:{passphrase}"],
+             "-keyout", key_file, "-out", csr_file, "-subj", subject, "-passout", f"file:{pass_file.name}"],
             check=True
         )
 
         # Generate the decrypted DK file (without passphrase)
         subprocess.run(
-            ["openssl", "rsa", "-in", key_file, "-out", dk_key_file, "-passin", f"pass:{passphrase}"],
+            ["openssl", "rsa", "-in", key_file, "-out", dk_key_file, "-passin", f"file:{pass_file.name}"],
             check=True
         )
 
-        # Ensure all files have no trailing blank line
+        # Clean up temporary password file
+        os.unlink(pass_file.name)
+
+        # Ensure all files have no trailing blank lines
         for file_path in [key_file, csr_file, dk_key_file]:
             with open(file_path, 'r+', newline='\n') as f:
                 content = f.read().rstrip()
