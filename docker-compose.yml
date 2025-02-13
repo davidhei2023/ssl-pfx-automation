@@ -1,7 +1,7 @@
 version: '3'
 services:
   ssl-automation-app:
-    image: ssl-automation-app:1.7.5
+    image: ssl-automation-app:1.8.1
     env_file:
       - .env
     ports:
