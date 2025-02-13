@@ -2,20 +2,12 @@ import os
 import subprocess
 import sys
 import tempfile
-from dotenv import load_dotenv, find_dotenv
 
-# Load environment variables from .env
-load_dotenv(find_dotenv())
 
 def main():
     if len(sys.argv) < 4:
         print("Usage: python3 script3.py <certificate_content> <private_key_content> <pfx_output_name>")
         sys.exit(1)
-
-    # Retrieve the password from the .env file
-    pfx_password = os.getenv("PFX_PASSWORD")
-    if not pfx_password:
-        raise ValueError("Environment variable 'PFX_PASSWORD' not set")
 
     cert_content = sys.argv[1]
     key_content = sys.argv[2]
@@ -32,7 +24,7 @@ def main():
     try:
         subprocess.run(
             ["openssl", "pkcs12", "-export", "-out", pfx_file,
-             "-inkey", key_file, "-in", cert_file, "-password", f"pass:{pfx_password}"],
+             "-inkey", key_file, "-in", cert_file, "-password", "pass:Aa1234", "-legacy"],
             check=True, capture_output=True, text=True
         )
         print(f"Successfully created {pfx_file}")
@@ -54,4 +46,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

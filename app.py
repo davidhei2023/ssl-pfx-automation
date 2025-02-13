@@ -112,16 +112,12 @@ def run_script3():
             key_file.flush()
 
         try:
-            pfx_password = os.getenv("PFX_PASSWORD")  # Get the password from environment variables
-            if not pfx_password:
-                raise ValueError("Environment variable 'PFX_PASSWORD' not set")
-
+            # Run OpenSSL to create the PFX file
             result = subprocess.run(
-                ["openssl", "pkcs12", "-export", "-out", "output.pfx",
-                 "-inkey", "key.pem", "-in", "cert.pem", "-password", f"pass:{pfx_password}"],
+                ["openssl", "pkcs12", "-export", "-out", pfx_file,
+                 "-inkey", key_file.name, "-in", cert_file.name, "-password", f"pass:{os.getenv('PFX_PASSWORD')}", "-legacy"],
                 capture_output=True, text=True, check=True
             )
-            print(result.stdout)
         except subprocess.CalledProcessError as e:
             error_output = e.stderr.lower()
             if "unable to load private key" in error_output:
@@ -199,4 +195,3 @@ def download(filename):
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=4000, debug=True)
-
