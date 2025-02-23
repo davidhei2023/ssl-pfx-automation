@@ -112,10 +112,15 @@ def run_script3():
             key_file.flush()
 
         try:
-            # Run OpenSSL to create the PFX file
+            # Add the friendly name with '-2025'
+            friendly_name = f"{pfx_name}-2025"
+
+            # Run OpenSSL to create the PFX file with friendly name
             result = subprocess.run(
                 ["openssl", "pkcs12", "-export", "-out", pfx_file,
-                 "-inkey", key_file.name, "-in", cert_file.name, "-password", f"pass:{os.getenv('PFX_PASSWORD')}", "-legacy"],
+                 "-inkey", key_file.name, "-in", cert_file.name,
+                 "-password", f"pass:{os.getenv('PFX_PASSWORD')}",
+                 "-legacy", "-name", friendly_name],
                 capture_output=True, text=True, check=True
             )
         except subprocess.CalledProcessError as e:
@@ -137,6 +142,7 @@ def run_script3():
 
     except Exception as e:
         return jsonify({"error": "An unexpected error occurred. Please try again."}), 500
+
 
 
 @app.route('/run/script6', methods=['POST'])
