@@ -1,10 +1,8 @@
 version: '3'
 services:
   ssl-automation-app:
-    image: ssl-automation-app:1.8.1
+    image: ssl-automation-app:1.8.2
     env_file:
       - .env
-    ports:
-      - "4000:4000"
     restart: always
 
